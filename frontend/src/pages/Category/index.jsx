@@ -82,8 +82,13 @@ export default function CategoryPage() {
   // Search & Filter state for papers
   const [searchQuery,     setSearchQuery]     = useState('')
   const [selectedSubject, setSelectedSubject] = useState('')
+  const [selectedYear,    setSelectedYear]    = useState('')
   const [selectedType,    setSelectedType]    = useState('all')
   const [selectedStatus,  setSelectedStatus]  = useState('all')
+  const [currentPage,     setCurrentPage]     = useState(1)
+  const [totalPapers,     setTotalPapers]     = useState(0)
+  const [totalPages,      setTotalPages]      = useState(1)
+  const [papersLoading,   setPapersLoading]   = useState(false)
 
   useEffect(() => {
     if (!user) {
@@ -101,7 +106,7 @@ export default function CategoryPage() {
     return 'Class 10'
   }, [slug, category])
 
-  // Load all data
+  // Load category metadata, syllabi, textbooks, and lessons
   useEffect(() => {
     setLoading(true)
     setError(null)
@@ -109,16 +114,14 @@ export default function CategoryPage() {
     Promise.all([
       fetchExam(slug),
       fetchYearSessions(slug, category),
-      fetchPapers({ exam: slug, category, per_page: 50 }),
       fetchCategoryCurriculum(slug, category).catch(() => ({ curricula: [] })),
       fetchTextbooks({ standard: standardLevel, per_page: 24 }).catch(() => ({ textbooks: [] })),
       fetchChapters({ standard: standardLevel }).catch(() => ({ chapters: [] })),
       fetchUserSyllabusProgress({ exam: slug }).catch(() => ({ completed_topics: [] })),
     ])
-      .then(([examData, ysData, papersData, currData, tbData, lessonsData, progData]) => {
+      .then(([examData, ysData, currData, tbData, lessonsData, progData]) => {
         setExam(examData)
         setYearSessions(ysData || [])
-        setPapers(papersData?.papers || [])
         setCurricula(currData?.curricula || [])
         setTextbooks(tbData?.textbooks || [])
         setCategoryLessons(lessonsData?.chapters || [])
@@ -127,6 +130,43 @@ export default function CategoryPage() {
       .catch(() => setError('Failed to load category listings.'))
       .finally(() => setLoading(false))
   }, [slug, category, standardLevel])
+
+  // Dynamic Server-Side Papers Fetcher based on Year, Subject, Status, Query, and Page
+  useEffect(() => {
+    let isCancelled = false
+    setPapersLoading(true)
+
+    const params = {
+      exam: slug,
+      category,
+      page: currentPage,
+      per_page: 48,
+    }
+    if (selectedYear) params.year = parseInt(selectedYear, 10)
+    if (selectedSubject) params.subject = selectedSubject
+    if (searchQuery) params.search = searchQuery
+    if (selectedType !== 'all') {
+      if (selectedType === 'key') params.has_answer_key = 'true'
+      else params.paper_type = selectedType
+    }
+    if (selectedStatus !== 'all') {
+      params.status = selectedStatus
+    }
+
+    fetchPapers(params)
+      .then((res) => {
+        if (isCancelled) return
+        setPapers(res.papers || [])
+        setTotalPapers(res.total || res.papers?.length || 0)
+        setTotalPages(res.total_pages || Math.ceil((res.total || 1) / 48) || 1)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!isCancelled) setPapersLoading(false)
+      })
+
+    return () => { isCancelled = true }
+  }, [slug, category, selectedYear, selectedSubject, searchQuery, selectedType, selectedStatus, currentPage])
 
   const categoryObj  = exam?.categories?.find(c => c.slug === category)
   const categoryName = categoryObj?.name || category
@@ -141,9 +181,21 @@ export default function CategoryPage() {
       : '',
   })
 
-  // Extract available subjects from papers
-  const availableSubjects = useMemo(() => {
+  // Extract available years from yearSessions
+  const availableYears = useMemo(() => {
     const set = new Set()
+    yearSessions.forEach(ys => {
+      if (ys.year) set.add(ys.year)
+    })
+    return Array.from(set).sort((a, b) => b - a)
+  }, [yearSessions])
+
+  // Extract or provide available subjects from papers and standard curriculum
+  const availableSubjects = useMemo(() => {
+    const set = new Set([
+      'Mathematics', 'Science', 'Social Science', 'English', 'Tamil',
+      'Hindi', 'Physics', 'Chemistry', 'Biology'
+    ])
     papers.forEach(p => {
       (p.subjects || []).forEach(s => {
         set.add(typeof s === 'object' ? s.name : s)
@@ -152,14 +204,15 @@ export default function CategoryPage() {
     return Array.from(set).filter(Boolean).sort()
   }, [papers])
 
-  // Filtered papers
+  // Filtered papers (client-side pass for instantaneous keyword refinements)
   const filteredPapers = useMemo(() => {
     return papers.filter(p => {
       const matchesSearch = !searchQuery || p.title.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesSubj = !selectedSubject || (p.subjects || []).some(s => {
         const name = typeof s === 'object' ? s.name : s
-        return name.toLowerCase() === selectedSubject.toLowerCase()
+        return name.toLowerCase().includes(selectedSubject.toLowerCase())
       })
+      const matchesYear = !selectedYear || String(p.year) === String(selectedYear)
       const matchesType = selectedType === 'all'
         ? true
         : selectedType === 'key'
@@ -168,9 +221,9 @@ export default function CategoryPage() {
       const matchesStatus = selectedStatus === 'all'
         ? true
         : (p.verification_status || 'verified') === selectedStatus
-      return matchesSearch && matchesSubj && matchesType && matchesStatus
+      return matchesSearch && matchesSubj && matchesYear && matchesType && matchesStatus
     })
-  }, [papers, searchQuery, selectedSubject, selectedType, selectedStatus])
+  }, [papers, searchQuery, selectedSubject, selectedYear, selectedType, selectedStatus])
 
   // Available subjects for lessons
   const availableLessonSubjects = useMemo(() => {
@@ -408,7 +461,7 @@ export default function CategoryPage() {
               display: 'flex',
               gap: 12,
               flexWrap: 'wrap',
-              marginBottom: 20,
+              marginBottom: 14,
               backgroundColor: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
               borderRadius: 14,
@@ -417,12 +470,12 @@ export default function CategoryPage() {
             }}>
               <input
                 type="text"
-                placeholder="Search papers by subject, year..."
+                placeholder="Search papers by title, subject..."
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1) }}
                 style={{
                   flex: 1,
-                  minWidth: 200,
+                  minWidth: 180,
                   padding: '8px 14px',
                   borderRadius: 8,
                   border: '1px solid var(--color-border)',
@@ -432,17 +485,38 @@ export default function CategoryPage() {
                 }}
               />
 
+              {/* Year Dropdown */}
+              <select
+                value={selectedYear}
+                onChange={e => { setSelectedYear(e.target.value); setCurrentPage(1) }}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  border: '1px solid var(--color-border)',
+                  backgroundColor: 'var(--color-bg)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem',
+                  fontWeight: selectedYear ? 700 : 500
+                }}
+              >
+                <option value="">All Exam Years</option>
+                {availableYears.map(yr => (
+                  <option key={yr} value={yr}>Year {yr}</option>
+                ))}
+              </select>
+
               {availableSubjects.length > 0 && (
                 <select
                   value={selectedSubject}
-                  onChange={e => setSelectedSubject(e.target.value)}
+                  onChange={e => { setSelectedSubject(e.target.value); setCurrentPage(1) }}
                   style={{
                     padding: '8px 12px',
                     borderRadius: 8,
                     border: '1px solid var(--color-border)',
                     backgroundColor: 'var(--color-bg)',
                     color: 'var(--text-primary)',
-                    fontSize: '0.875rem'
+                    fontSize: '0.875rem',
+                    fontWeight: selectedSubject ? 700 : 500
                   }}
                 >
                   <option value="">All Subjects ({availableSubjects.length})</option>
@@ -454,7 +528,7 @@ export default function CategoryPage() {
 
               <select
                 value={selectedType}
-                onChange={e => setSelectedType(e.target.value)}
+                onChange={e => { setSelectedType(e.target.value); setCurrentPage(1) }}
                 style={{
                   padding: '8px 12px',
                   borderRadius: 8,
@@ -472,7 +546,7 @@ export default function CategoryPage() {
 
               <select
                 value={selectedStatus}
-                onChange={e => setSelectedStatus(e.target.value)}
+                onChange={e => { setSelectedStatus(e.target.value); setCurrentPage(1) }}
                 style={{
                   padding: '8px 12px',
                   borderRadius: 8,
@@ -482,15 +556,71 @@ export default function CategoryPage() {
                   fontSize: '0.875rem'
                 }}
               >
-                <option value="all">All Verification Statuses</option>
-                <option value="verified">🟢 Verified Only (Official)</option>
-                <option value="unverified">🟡 Provisional / Unverified</option>
+                <option value="all">All Statuses</option>
+                <option value="verified">🟢 Verified Only</option>
+                <option value="unverified">🟡 Provisional</option>
               </select>
 
               <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>
-                Showing {filteredPapers.length} of {papers.length} papers
+                {papersLoading ? '⏳ Loading...' : `Showing ${filteredPapers.length} of ${totalPapers || filteredPapers.length} papers`}
               </span>
             </div>
+
+            {/* Quick Year Navigation Bar */}
+            {availableYears.length > 0 && (
+              <div style={{
+                display: 'flex',
+                gap: 8,
+                flexWrap: 'wrap',
+                marginBottom: 20,
+                alignItems: 'center',
+                padding: '8px 14px',
+                backgroundColor: 'rgba(0,0,0,0.015)',
+                borderRadius: 10,
+                border: '1px solid var(--color-border)'
+              }}>
+                <span style={{ fontSize: '0.78125rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+                  📅 Quick Year:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { setSelectedYear(''); setCurrentPage(1) }}
+                  style={{
+                    padding: '3px 10px',
+                    borderRadius: 14,
+                    border: '1px solid',
+                    borderColor: !selectedYear ? accentColor : 'var(--color-border)',
+                    backgroundColor: !selectedYear ? `${accentColor}20` : 'transparent',
+                    color: !selectedYear ? accentColor : 'var(--text-secondary)',
+                    fontSize: '0.75rem',
+                    fontWeight: !selectedYear ? 700 : 500,
+                    cursor: 'pointer'
+                  }}
+                >
+                  All Years
+                </button>
+                {availableYears.slice(0, 15).map(yr => (
+                  <button
+                    key={yr}
+                    type="button"
+                    onClick={() => { setSelectedYear(String(yr)); setCurrentPage(1) }}
+                    style={{
+                      padding: '3px 10px',
+                      borderRadius: 14,
+                      border: '1px solid',
+                      borderColor: selectedYear === String(yr) ? accentColor : 'var(--color-border)',
+                      backgroundColor: selectedYear === String(yr) ? `${accentColor}20` : 'transparent',
+                      color: selectedYear === String(yr) ? accentColor : 'var(--text-secondary)',
+                      fontSize: '0.75rem',
+                      fontWeight: selectedYear === String(yr) ? 700 : 500,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {yr}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Papers Grid */}
             {filteredPapers.length === 0 ? (
@@ -634,6 +764,45 @@ export default function CategoryPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Pagination Controls for Question Papers */}
+            {totalPages > 1 && (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 14,
+                marginTop: 24,
+                marginBottom: 36,
+                padding: '12px 20px',
+                backgroundColor: 'var(--color-surface)',
+                borderRadius: 12,
+                border: '1px solid var(--color-border)',
+                flexWrap: 'wrap'
+              }}>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  disabled={currentPage <= 1 || papersLoading}
+                  onClick={() => { setCurrentPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 400, behavior: 'smooth' }) }}
+                  style={{ fontWeight: 600 }}
+                >
+                  ← Previous Page
+                </button>
+
+                <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Page {currentPage} of {totalPages} <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({totalPapers} total papers)</span>
+                </span>
+
+                <button
+                  className="btn btn-secondary btn-sm"
+                  disabled={currentPage >= totalPages || papersLoading}
+                  onClick={() => { setCurrentPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 400, behavior: 'smooth' }) }}
+                  style={{ fontWeight: 600 }}
+                >
+                  Next Page →
+                </button>
               </div>
             )}
           </div>

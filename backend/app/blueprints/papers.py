@@ -378,12 +378,22 @@ def download_paper(paper_id):
 def _fetch_pdf_bytes(url: str, upload_folder: str) -> bytes:
     if not url:
         return b""
+    if "/uploads/" in url:
+        rel_path = url.split("/uploads/", 1)[1]
+        local_path = os.path.join(upload_folder, rel_path.replace("/", os.sep))
+        if os.path.exists(local_path):
+            with open(local_path, "rb") as f:
+                content = f.read()
+                if len(content) > 0:
+                    return content
     if url.startswith("/uploads/"):
         rel_path = url[len("/uploads/"):]
         local_path = os.path.join(upload_folder, rel_path.replace("/", os.sep))
         if os.path.exists(local_path):
             with open(local_path, "rb") as f:
-                return f.read()
+                content = f.read()
+                if len(content) > 0:
+                    return content
         # Fallback: if local dummy file doesn't exist, return minimal valid PDF banner
         return (
             b"%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
@@ -428,6 +438,8 @@ def proxy_pdf():
     response = current_app.response_class(pdf_bytes, mimetype="application/pdf")
     response.headers["Content-Disposition"] = "inline"
     response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["X-Frame-Options"] = "ALLOWALL"
+    response.headers["Content-Security-Policy"] = "frame-ancestors *"
     return response
 
 

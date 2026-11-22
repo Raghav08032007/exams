@@ -149,7 +149,7 @@ export default function PaperDetailPage() {
   const [selectedTextbookIndex, setSelectedTextbookIndex] = useState(0)
   const [splitSecondary, setSplitSecondary] = useState('key') // 'key' | 'textbook'
   const [viewerMode, setViewerMode] = useState('embed') // 'embed' (native iframe) | 'canvas' (react-pdf)
-  const [useProxy, setUseProxy] = useState(false)
+  const [useProxy, setUseProxy] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [numPages, setNumPages] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
@@ -425,10 +425,18 @@ export default function PaperDetailPage() {
     rawViewUrl = activeTextbook.pdf_url
   }
 
-  const currentViewUrl = useProxy ? getProxyPdfUrl(rawViewUrl) : rawViewUrl
-  const leftPaneUrl = useProxy ? getProxyPdfUrl(pdfUrl) : pdfUrl
+  const resolveDocUrl = (url) => {
+    if (!url) return ''
+    if (useProxy || url.startsWith('http://') || url.startsWith('https://')) {
+      return getProxyPdfUrl(url)
+    }
+    return url
+  }
+
+  const currentViewUrl = resolveDocUrl(rawViewUrl)
+  const leftPaneUrl = resolveDocUrl(pdfUrl)
   const rightPaneRawUrl = splitSecondary === 'textbook' && activeTextbook ? activeTextbook.pdf_url : paper?.answer_key_pdf_url
-  const rightPaneUrl = useProxy ? getProxyPdfUrl(rightPaneRawUrl) : rightPaneRawUrl
+  const rightPaneUrl = resolveDocUrl(rightPaneRawUrl)
 
   if (loading) {
     return (

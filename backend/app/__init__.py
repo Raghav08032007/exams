@@ -72,7 +72,11 @@ def create_app(config_name: str = "development") -> Flask:
     # ── Serve uploaded PDFs ──────────────────────────────────────────────────
     @app.route("/uploads/<path:filename>")
     def serve_upload(filename):
-        return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+        response = send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["X-Frame-Options"] = "ALLOWALL"
+        response.headers["Content-Security-Policy"] = "frame-ancestors *"
+        return response
 
     # ── Health check ─────────────────────────────────────────────────────────
     @app.route("/health")

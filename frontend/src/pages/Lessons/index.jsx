@@ -1,9 +1,10 @@
 /**
- * Lessons & Chapter-Wise Learning Hub — Complete 4-Tier Categorization System:
- * 1. Education-Based Classification (School K-12, Entrances, Civil Services, Defence)
- * 2. Exam-Based Classification (CBSE, TN State Board, JEE, NEET, UPSC, TNPSC, ICSE)
- * 3. Class-Based Classification (Class 10, Class 12, UG Entrance, Graduate Level)
- * 4. Subject-Based Disciplinary Classification (Maths, Sciences, Social, Languages, Tech/Commerce, GS)
+ * Lessons & Curriculum Learning Hub
+ * Multi-Tier Academic Categorization:
+ *  1. Exam / Board: CBSE, Tamil Nadu State Board, All State Boards, JEE, NEET, UPSC, TNPSC
+ *  2. Class / Standard: Class 10, Class 12, Entrance Level, Graduate Level
+ *  3. Subject: Mathematics, Science, Social Science, English, Tamil, Physics, Chemistry, Biology, etc.
+ *  4. Education Sector: School K-12, National Entrances, Civil Services, Defence
  *
  * Route: /lessons
  */
@@ -14,99 +15,66 @@ import { PageSkeleton } from '../../components/ui/Skeleton'
 import { useToastStore } from '../../store'
 import { useSEO } from '../../hooks/useSEO'
 
-// ── 1. EDUCATION-BASED CLASSIFICATION ─────────────────────────────────────────
-const EDUCATION_SECTORS = [
-  { id: '', label: '🌐 All Education Systems', icon: '🌐', desc: 'Browse all academic domains' },
-  { id: 'school', label: '🏫 School Education (K-12 Boards)', icon: '🏫', desc: 'CBSE, ICSE & State Boards (Class 10 & 12)' },
-  { id: 'entrance', label: '🎯 National Competitive Entrances', icon: '🎯', desc: 'Engineering (JEE) & Medical (NEET UG)' },
-  { id: 'civil_services', label: '🏛️ Civil & Public Administrative Services', icon: '🏛️', desc: 'UPSC (IAS/IPS/IFS) & TNPSC (Group 1, 2, 4, VAO)' },
-  { id: 'defence', label: '🛡️ Defence & Technical Services', icon: '🛡️', desc: 'NDA, CDS, CAPF, ESE/IES, CMS' },
+// ── 1. EXAM & BOARD OPTIONS ──────────────────────────────────────────────────
+const EXAM_OPTIONS = [
+  { id: '', label: 'All Exams & Boards', icon: '📝' },
+  { id: 'cbse', label: 'CBSE Board', icon: '🏛️', badge: 'CBSE' },
+  { id: 'tn-board', label: 'Tamil Nadu State Board', icon: '🌴', badge: 'TN DGE' },
+  { id: 'state-boards', label: 'State Boards (UP/MH/Bihar/RJ)', icon: '🗺️', badge: 'State' },
+  { id: 'jee', label: 'JEE (Main & Adv)', icon: '⚛️', badge: 'NTA' },
+  { id: 'neet', label: 'NEET UG', icon: '🩺', badge: 'NTA' },
+  { id: 'upsc', label: 'UPSC Civil Services', icon: '🇮🇳', badge: 'UPSC' },
+  { id: 'tnpsc', label: 'TNPSC Group Exams', icon: '📜', badge: 'TNPSC' },
 ]
 
-// ── 2. EXAM-BASED CLASSIFICATION ──────────────────────────────────────────────
-const EXAM_TYPES = [
-  { id: '', label: 'All Examinations', badge: 'All' },
-  { id: 'cbse', label: 'CBSE Board (Class 10 & 12)', badge: 'CBSE' },
-  { id: 'tn-board', label: 'Tamil Nadu State Board (SSLC & HSC)', badge: 'TN DGE' },
-  { id: 'jee', label: 'JEE (Main & Advanced)', badge: 'NTA' },
-  { id: 'neet', label: 'NEET UG (Medical Entrance)', badge: 'NTA' },
-  { id: 'upsc', label: 'UPSC Civil Services (Prelims & Mains)', badge: 'UPSC' },
-  { id: 'tnpsc', label: 'TNPSC (Group 1, 2, 4 & VAO)', badge: 'TNPSC' },
-  { id: 'icse', label: 'CISCE (ICSE Class 10 & ISC 12)', badge: 'ICSE' },
-  { id: 'state-boards', label: 'Other State Boards (UP, Bihar, Maharashtra, Rajasthan)', badge: 'State' },
+// ── 2. CLASS / STANDARD OPTIONS ─────────────────────────────────────────────
+const CLASS_OPTIONS = [
+  { id: '', label: 'All Classes' },
+  { id: 'Class 10', label: 'Class 10 (SSLC / Secondary)' },
+  { id: 'Class 12', label: 'Class 12 (HSC / +2)' },
+  { id: 'JEE', label: 'Pre-Engineering (Class 11-12)' },
+  { id: 'NEET', label: 'Pre-Medical (Class 11-12)' },
+  { id: 'UPSC', label: 'Graduate Civil Services' },
+  { id: 'TNPSC', label: 'State Services Level' },
 ]
 
-// ── 3. CLASS / LEVEL-BASED CLASSIFICATION ─────────────────────────────────────
-const CLASS_LEVELS = [
-  { id: '', label: 'All Standards / Levels', badge: 'All' },
-  { id: 'Class 10', label: 'Class 10 (Secondary School Leaving Certificate / SSLC)', badge: '10th' },
-  { id: 'Class 12', label: 'Class 12 (Higher Secondary / HSC / +2)', badge: '12th' },
-  { id: 'JEE', label: 'Pre-University / Engineering Entrance Level', badge: 'UG Entrance' },
-  { id: 'NEET', label: 'Pre-Medical / Medical Entrance Level', badge: 'Medical Entrance' },
-  { id: 'UPSC', label: 'Graduate Level / All-India Civil Services', badge: 'Graduate' },
-  { id: 'TNPSC', label: 'State Administrative / Group 1, 2, 4 & VAO Level', badge: 'State Level' },
+// ── 3. EDUCATION SECTOR OPTIONS ─────────────────────────────────────────────
+const EDUCATION_OPTIONS = [
+  { id: '', label: 'All Education Streams' },
+  { id: 'school', label: '🏫 School Education (K-12)' },
+  { id: 'entrance', label: '🎯 National Entrances' },
+  { id: 'civil_services', label: '🏛️ Civil Services' },
+  { id: 'defence', label: '🛡️ Defence & Technical' },
 ]
 
-// ── 4. SUBJECT-BASED DISCIPLINARY DOMAINS ────────────────────────────────────
-const SUBJECT_DOMAINS = [
-  {
-    id: '',
-    label: 'All Disciplinary Subjects',
-    icon: '📚'
-  },
-  {
-    id: 'math',
-    label: '📐 Mathematics & Quantitative Aptitude',
-    icon: '📐',
-    subjects: ['Mathematics', 'Algebra', 'Geometry', 'Trigonometry', 'Calculus', 'Statistics', 'Aptitude']
-  },
-  {
-    id: 'science',
-    label: '🔬 Sciences & Applied Physics/Chemistry/Biology',
-    icon: '🔬',
-    subjects: ['Science', 'Physics', 'Chemistry', 'Biology', 'Botany', 'Zoology']
-  },
-  {
-    id: 'social',
-    label: '🌍 Social Sciences, History & Humanities',
-    icon: '🌍',
-    subjects: ['Social Science', 'History', 'Geography', 'Polity', 'Civics', 'Economics']
-  },
-  {
-    id: 'languages',
-    label: '🗣️ Languages & Literature',
-    icon: '🗣️',
-    subjects: ['English', 'Tamil', 'General Tamil', 'Hindi', 'Sanskrit', 'Arabic']
-  },
-  {
-    id: 'tech_commerce',
-    label: '💻 Computer Science, Commerce & Vocational',
-    icon: '💻',
-    subjects: ['Information Technology', 'Computer Science', 'Computer Applications', 'Artificial Intelligence', 'Accountancy', 'Business Studies']
-  },
-  {
-    id: 'general_studies',
-    label: '🏛️ General Studies, Governance & CSAT',
-    icon: '🏛️',
-    subjects: ['General Studies', 'CSAT', 'Mental Ability', 'Logical Reasoning', 'Current Affairs', 'General Knowledge']
-  }
-]
+// ── SUBJECT COLOR THEMES & ICONS ────────────────────────────────────────────
+const SUBJECT_META = {
+  'Mathematics': { icon: '📐', bg: '#EFF6FF', border: '#BFDBFE', text: '#1D4ED8', accent: '#3B82F6' },
+  'Science': { icon: '🔬', bg: '#ECFDF5', border: '#A7F3D0', text: '#047857', accent: '#10B981' },
+  'Social Science': { icon: '🌍', bg: '#FFFBEB', border: '#FDE68A', text: '#B45309', accent: '#F59E0B' },
+  'Tamil': { icon: '✍️', bg: '#FAF5FF', border: '#E9D5FF', text: '#7E22CE', accent: '#9333EA' },
+  'English': { icon: '📖', bg: '#EEF2FF', border: '#C7D2FE', text: '#4338CA', accent: '#6366F1' },
+  'Physics': { icon: '⚛️', bg: '#F0FDF4', border: '#BBF7D0', text: '#15803D', accent: '#22C55E' },
+  'Chemistry': { icon: '🧪', bg: '#FFF1F2', border: '#FECDD3', text: '#BE123C', accent: '#F43F5E' },
+  'Biology': { icon: '🧬', bg: '#F0FDFA', border: '#99F6E4', text: '#0F766E', accent: '#14B8A6' },
+  'General Studies': { icon: '🏛️', bg: '#F8FAFC', border: '#E2E8F0', text: '#334155', accent: '#64748B' },
+  'CSAT': { icon: '🧠', bg: '#FDF4FF', border: '#F0ABFC', text: '#86198F', accent: '#C026D3' },
+  'Information Technology': { icon: '💻', bg: '#F0F9FF', border: '#BAE6FD', text: '#0369A1', accent: '#0284C7' },
+  'Accountancy': { icon: '📊', bg: '#ECFDF5', border: '#A7F3D0', text: '#065F46', accent: '#059669' },
+}
 
 export default function LessonsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const initialStd = searchParams.get('standard') || ''
-  const initialSubj = searchParams.get('subject') || ''
-  const initialEdu = searchParams.get('education') || ''
   const initialExam = searchParams.get('exam') || ''
-  const initialDomain = searchParams.get('domain') || ''
+  const initialClass = searchParams.get('standard') || ''
+  const initialSubject = searchParams.get('subject') || ''
+  const initialEdu = searchParams.get('education') || ''
 
-  // 4-Axis Classification State
-  const [activeTier, setActiveTier] = useState('education') // 'education' | 'exam' | 'class' | 'subject'
-  const [educationFilter, setEducationFilter] = useState(initialEdu)
-  const [examFilter, setExamFilter] = useState(initialExam)
-  const [classFilter, setClassFilter] = useState(initialStd)
-  const [domainFilter, setDomainFilter] = useState(initialDomain)
-  const [subjectFilter, setSubjectFilter] = useState(initialSubj)
+  // Filter state
+  const [selectedExam, setSelectedExam] = useState(initialExam)
+  const [selectedClass, setSelectedClass] = useState(initialClass)
+  const [selectedSubject, setSelectedSubject] = useState(initialSubject)
+  const [selectedEdu, setSelectedEdu] = useState(initialEdu)
   const [searchQuery, setSearchQuery] = useState('')
 
   const [chapters, setChapters] = useState([])
@@ -129,8 +97,8 @@ export default function LessonsPage() {
   const { addToast } = useToastStore()
 
   useSEO({
-    title: 'Curriculum Lessons Hub — 4-Tier Academic Classification | ExamVault',
-    description: 'Master every lesson across School Education, Entrance Exams, Civil Services, and Defence. Explore textbook chapters, past board questions, and verified marking scheme solutions.',
+    title: 'Curriculum Lessons Hub — Chapter Questions & Solutions | ExamVault',
+    description: 'Master lessons across CBSE, Tamil Nadu State Board, JEE, NEET, and UPSC. Explore syllabus chapters, past board questions, and verified step-by-step solutions.',
   })
 
   // Load all curriculum chapters
@@ -153,13 +121,12 @@ export default function LessonsPage() {
   // Sync state to URL search params
   useEffect(() => {
     const params = {}
-    if (educationFilter) params.education = educationFilter
-    if (examFilter) params.exam = examFilter
-    if (classFilter) params.standard = classFilter
-    if (domainFilter) params.domain = domainFilter
-    if (subjectFilter) params.subject = subjectFilter
+    if (selectedExam) params.exam = selectedExam
+    if (selectedClass) params.standard = selectedClass
+    if (selectedSubject) params.subject = selectedSubject
+    if (selectedEdu) params.education = selectedEdu
     setSearchParams(params, { replace: true })
-  }, [educationFilter, examFilter, classFilter, domainFilter, subjectFilter, setSearchParams])
+  }, [selectedExam, selectedClass, selectedSubject, selectedEdu, setSearchParams])
 
   // Extract distinct available subjects across loaded chapters
   const allUniqueSubjects = useMemo(() => {
@@ -170,58 +137,48 @@ export default function LessonsPage() {
     return Array.from(set).sort()
   }, [chapters])
 
-  // Filter chapters across all 4 Classification Axes + Search
+  // Filter chapters
   const filteredChapters = useMemo(() => {
     return chapters.filter(c => {
-      // 1. Education Sector Filter
-      if (educationFilter === 'school') {
-        if (!['Class 10', 'Class 12'].includes(c.standard_level)) return false
-      } else if (educationFilter === 'entrance') {
-        if (!['JEE', 'NEET'].includes(c.standard_level)) return false
-      } else if (educationFilter === 'civil_services') {
-        if (!['UPSC', 'TNPSC'].includes(c.standard_level)) return false
-      } else if (educationFilter === 'defence') {
-        if (!['NDA', 'CDS', 'Defence'].includes(c.standard_level)) return false
-      }
-
-      // 2. Exam Filter
-      if (examFilter === 'cbse') {
+      // 1. Exam Filter
+      if (selectedExam === 'cbse') {
         if (!c.board.includes('CBSE') && !c.exam_slug.includes('class-10') && !c.exam_slug.includes('class-12')) return false
-      } else if (examFilter === 'tn-board') {
+      } else if (selectedExam === 'tn-board') {
         if (!c.board.includes('State') && c.exam_slug !== 'tnpsc' && !c.subject_name.includes('Tamil')) return false
-      } else if (examFilter === 'jee') {
+      } else if (selectedExam === 'jee') {
         if (c.standard_level !== 'JEE' && c.exam_slug !== 'jee') return false
-      } else if (examFilter === 'neet') {
+      } else if (selectedExam === 'neet') {
         if (c.standard_level !== 'NEET' && c.exam_slug !== 'neet') return false
-      } else if (examFilter === 'upsc') {
+      } else if (selectedExam === 'upsc') {
         if (c.standard_level !== 'UPSC' && c.exam_slug !== 'upsc') return false
-      } else if (examFilter === 'tnpsc') {
+      } else if (selectedExam === 'tnpsc') {
         if (c.standard_level !== 'TNPSC' && c.exam_slug !== 'tnpsc') return false
-      } else if (examFilter === 'icse') {
-        if (!c.board.includes('ICSE') && !c.exam_slug.includes('icse')) return false
-      } else if (examFilter === 'state-boards') {
+      } else if (selectedExam === 'state-boards') {
         if (!c.board.includes('State')) return false
       }
 
-      // 3. Class / Standard Filter
-      if (classFilter && c.standard_level !== classFilter) {
+      // 2. Class / Standard Filter
+      if (selectedClass && c.standard_level !== selectedClass) {
         return false
       }
 
-      // 4. Disciplinary Domain Filter
-      if (domainFilter) {
-        const domainObj = SUBJECT_DOMAINS.find(d => d.id === domainFilter)
-        if (domainObj && domainObj.subjects && !domainObj.subjects.includes(c.subject_name)) {
-          return false
-        }
-      }
-
-      // 5. Specific Subject Filter
-      if (subjectFilter && c.subject_name.toLowerCase() !== subjectFilter.toLowerCase()) {
+      // 3. Subject Filter
+      if (selectedSubject && c.subject_name.toLowerCase() !== selectedSubject.toLowerCase()) {
         return false
       }
 
-      // 6. Search Query
+      // 4. Education Sector Filter
+      if (selectedEdu === 'school') {
+        if (!['Class 10', 'Class 12'].includes(c.standard_level)) return false
+      } else if (selectedEdu === 'entrance') {
+        if (!['JEE', 'NEET'].includes(c.standard_level)) return false
+      } else if (selectedEdu === 'civil_services') {
+        if (!['UPSC', 'TNPSC'].includes(c.standard_level)) return false
+      } else if (selectedEdu === 'defence') {
+        if (!['NDA', 'CDS', 'Defence'].includes(c.standard_level)) return false
+      }
+
+      // 5. Search Query
       if (searchQuery) {
         const q = searchQuery.toLowerCase().trim()
         const matchTitle = c.chapter_title.toLowerCase().includes(q)
@@ -233,28 +190,26 @@ export default function LessonsPage() {
 
       return true
     })
-  }, [chapters, educationFilter, examFilter, classFilter, domainFilter, subjectFilter, searchQuery])
+  }, [chapters, selectedExam, selectedClass, selectedSubject, selectedEdu, searchQuery])
 
   // Count active filters
   const activeFiltersCount = useMemo(() => {
     let count = 0
-    if (educationFilter) count++
-    if (examFilter) count++
-    if (classFilter) count++
-    if (domainFilter) count++
-    if (subjectFilter) count++
+    if (selectedExam) count++
+    if (selectedClass) count++
+    if (selectedSubject) count++
+    if (selectedEdu) count++
     if (searchQuery) count++
     return count
-  }, [educationFilter, examFilter, classFilter, domainFilter, subjectFilter, searchQuery])
+  }, [selectedExam, selectedClass, selectedSubject, selectedEdu, searchQuery])
 
   const clearAllFilters = () => {
-    setEducationFilter('')
-    setExamFilter('')
-    setClassFilter('')
-    setDomainFilter('')
-    setSubjectFilter('')
+    setSelectedExam('')
+    setSelectedClass('')
+    setSelectedSubject('')
+    setSelectedEdu('')
     setSearchQuery('')
-    addToast('Filters reset to show all curriculum lessons.', 'info')
+    addToast('Filters reset.', 'info')
   }
 
   const handleOpenChapter = async (chapId, tab = 'questions') => {
@@ -303,23 +258,22 @@ export default function LessonsPage() {
     <div className="page-content">
       <div className="container" style={{ maxWidth: 1200 }}>
 
-        {/* ── HEADER & BREADCRUMBS ────────────────────────────────────────── */}
+        {/* ── HEADER ──────────────────────────────────────────────────────── */}
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-            <span style={{ fontSize: '2rem' }}>📑</span>
+            <span style={{ fontSize: '2.2rem' }}>📑</span>
             <div>
-              <h1 style={{ fontSize: 'clamp(1.6rem, 3.2vw, 2.3rem)', margin: 0, color: 'var(--text-primary)', fontWeight: 800 }}>
-                Curriculum Lessons & Academic Knowledge Base
+              <h1 style={{ fontSize: 'clamp(1.6rem, 3.2vw, 2.2rem)', margin: 0, color: 'var(--text-primary)', fontWeight: 800, letterSpacing: '-0.02em' }}>
+                Curriculum Lessons & Question Bank
               </h1>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', margin: '4px 0 0', lineHeight: 1.5 }}>
-                Categorized across <strong>Education Systems</strong>, <strong>Examinations</strong>, <strong>Classes / Standards</strong>, and <strong>Disciplinary Subject Domains</strong>.
-                Nothing left outside.
+                Structured chapter-wise learning across CBSE, State Boards, JEE, NEET, and UPSC with past board questions, official marking schemes, and textbook readers.
               </p>
             </div>
           </div>
         </div>
 
-        {/* ── 4-TIER CLASSIFICATION NAVIGATION PANEL ──────────────────────── */}
+        {/* ── CLEAN MULTI-TIER FILTER DASHBOARD ────────────────────────────── */}
         <div style={{
           backgroundColor: '#ffffff',
           borderRadius: '16px',
@@ -328,49 +282,23 @@ export default function LessonsPage() {
           padding: '20px 24px',
           marginBottom: 28
         }}>
-          {/* Top Axis Tabs */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14, borderBottom: '1px solid #E5E7EB', paddingBottom: 14, marginBottom: 18 }}>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {[
-                { id: 'education', label: '🏫 1. Education-Based', count: EDUCATION_SECTORS.length - 1 },
-                { id: 'exam', label: '📝 2. Exam-Based', count: EXAM_TYPES.length - 1 },
-                { id: 'class', label: '🎓 3. Class-Based', count: CLASS_LEVELS.length - 1 },
-                { id: 'subject', label: '📚 4. Subject-Based', count: allUniqueSubjects.length },
-              ].map(tier => (
-                <button
-                  key={tier.id}
-                  onClick={() => setActiveTier(tier.id)}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontWeight: activeTier === tier.id ? 700 : 500,
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    backgroundColor: activeTier === tier.id ? '#8B5CF6' : '#F3F4F6',
-                    color: activeTier === tier.id ? '#ffffff' : '#4B5563',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {tier.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Quick Live Search Bar */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '1 1 260px', maxWidth: 360 }}>
+          
+          {/* Row 1: Search & Quick Reset */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 18, borderBottom: '1px solid #F3F4F6', paddingBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: '1 1 300px' }}>
+              <span style={{ fontSize: '1.1rem' }}>🔍</span>
               <input
                 type="text"
-                placeholder="Search across all 76 lessons & topics..."
+                placeholder="Search lessons, chapter names, key topics..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '8px 14px',
-                  borderRadius: '8px',
+                  padding: '9px 14px',
+                  borderRadius: '10px',
                   border: '1px solid var(--color-border)',
                   backgroundColor: 'var(--color-bg)',
-                  fontSize: '0.85rem',
+                  fontSize: '0.875rem',
                   color: 'var(--text-primary)'
                 }}
               />
@@ -384,190 +312,159 @@ export default function LessonsPage() {
                 </button>
               )}
             </div>
-          </div>
 
-          {/* ── TIER 1: EDUCATION-BASED CONTROLS ── */}
-          {activeTier === 'education' && (
-            <div>
-              <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Select Educational Sector / Domain
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
-                {EDUCATION_SECTORS.map(sec => {
-                  const isSelected = educationFilter === sec.id
-                  return (
-                    <div
-                      key={sec.id}
-                      onClick={() => setEducationFilter(sec.id)}
-                      style={{
-                        padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: isSelected ? '2px solid #8B5CF6' : '1px solid var(--color-border)',
-                        backgroundColor: isSelected ? '#F5F3FF' : '#FAFAFA',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      <div style={{ fontWeight: 700, fontSize: '0.9rem', color: isSelected ? '#6D28D9' : 'var(--text-primary)', marginBottom: 4 }}>
-                        {sec.label}
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.3 }}>
-                        {sec.desc}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* ── TIER 2: EXAM-BASED CONTROLS ── */}
-          {activeTier === 'exam' && (
-            <div>
-              <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Filter by Statutory Examination Authority
-              </div>
-              <div className="filter-chips">
-                {EXAM_TYPES.map(ex => {
-                  const isSelected = examFilter === ex.id
-                  return (
-                    <button
-                      key={ex.id}
-                      className={`filter-chip ${isSelected ? 'active' : ''}`}
-                      onClick={() => setExamFilter(ex.id)}
-                      style={isSelected ? { backgroundColor: '#8B5CF6', borderColor: '#8B5CF6', color: '#fff' } : {}}
-                    >
-                      {ex.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* ── TIER 3: CLASS / LEVEL-BASED CONTROLS ── */}
-          {activeTier === 'class' && (
-            <div>
-              <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Filter by Academic Class / Standard / Level
-              </div>
-              <div className="filter-chips">
-                {CLASS_LEVELS.map(cl => {
-                  const isSelected = classFilter === cl.id
-                  return (
-                    <button
-                      key={cl.id}
-                      className={`filter-chip ${isSelected ? 'active' : ''}`}
-                      onClick={() => setClassFilter(cl.id)}
-                      style={isSelected ? { backgroundColor: '#8B5CF6', borderColor: '#8B5CF6', color: '#fff' } : {}}
-                    >
-                      {cl.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* ── TIER 4: SUBJECT-BASED DISCIPLINARY CONTROLS ── */}
-          {activeTier === 'subject' && (
-            <div>
-              <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Disciplinary Domains (No Subject Left Outside)
-              </div>
-              <div className="filter-chips" style={{ marginBottom: 14 }}>
-                {SUBJECT_DOMAINS.map(dom => {
-                  const isSelected = domainFilter === dom.id
-                  return (
-                    <button
-                      key={dom.id}
-                      className={`filter-chip ${isSelected ? 'active' : ''}`}
-                      onClick={() => {
-                        setDomainFilter(dom.id)
-                        setSubjectFilter('')
-                      }}
-                      style={isSelected ? { backgroundColor: '#8B5CF6', borderColor: '#8B5CF6', color: '#fff' } : {}}
-                    >
-                      {dom.label}
-                    </button>
-                  )
-                })}
-              </div>
-
-              {/* Individual Subject Chips */}
-              <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6B7280', marginBottom: 8 }}>
-                Specific Subject:
-              </div>
-              <div className="filter-chips">
-                <button
-                  className={`filter-chip ${subjectFilter === '' ? 'active' : ''}`}
-                  onClick={() => setSubjectFilter('')}
-                >
-                  All ({allUniqueSubjects.length} Subjects)
-                </button>
-                {allUniqueSubjects.map(sub => {
-                  const isSelected = subjectFilter.toLowerCase() === sub.toLowerCase()
-                  return (
-                    <button
-                      key={sub}
-                      className={`filter-chip ${isSelected ? 'active' : ''}`}
-                      onClick={() => setSubjectFilter(sub)}
-                      style={isSelected ? { backgroundColor: '#10B981', borderColor: '#10B981', color: '#fff' } : {}}
-                    >
-                      {sub}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* ── ACTIVE FILTER BREADCRUMB BADGES & CLEAR BUTTON ── */}
-          {activeFiltersCount > 0 && (
-            <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid #F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', fontSize: '0.8125rem' }}>
-                <span style={{ fontWeight: 600, color: '#6B7280' }}>Active Filters ({activeFiltersCount}):</span>
-                {educationFilter && (
-                  <span style={{ backgroundColor: '#EDE9FE', color: '#6D28D9', padding: '3px 9px', borderRadius: '12px', fontWeight: 600 }}>
-                    Edu: {educationFilter} <span style={{ cursor: 'pointer', marginLeft: 4 }} onClick={() => setEducationFilter('')}>✕</span>
-                  </span>
-                )}
-                {examFilter && (
-                  <span style={{ backgroundColor: '#EDE9FE', color: '#6D28D9', padding: '3px 9px', borderRadius: '12px', fontWeight: 600 }}>
-                    Exam: {examFilter} <span style={{ cursor: 'pointer', marginLeft: 4 }} onClick={() => setExamFilter('')}>✕</span>
-                  </span>
-                )}
-                {classFilter && (
-                  <span style={{ backgroundColor: '#EDE9FE', color: '#6D28D9', padding: '3px 9px', borderRadius: '12px', fontWeight: 600 }}>
-                    Class: {classFilter} <span style={{ cursor: 'pointer', marginLeft: 4 }} onClick={() => setClassFilter('')}>✕</span>
-                  </span>
-                )}
-                {domainFilter && (
-                  <span style={{ backgroundColor: '#EDE9FE', color: '#6D28D9', padding: '3px 9px', borderRadius: '12px', fontWeight: 600 }}>
-                    Domain: {domainFilter} <span style={{ cursor: 'pointer', marginLeft: 4 }} onClick={() => setDomainFilter('')}>✕</span>
-                  </span>
-                )}
-                {subjectFilter && (
-                  <span style={{ backgroundColor: '#D1FAE5', color: '#065F46', padding: '3px 9px', borderRadius: '12px', fontWeight: 600 }}>
-                    Subject: {subjectFilter} <span style={{ cursor: 'pointer', marginLeft: 4 }} onClick={() => setSubjectFilter('')}>✕</span>
-                  </span>
-                )}
-                {searchQuery && (
-                  <span style={{ backgroundColor: '#FEF3C7', color: '#92400E', padding: '3px 9px', borderRadius: '12px', fontWeight: 600 }}>
-                    Keyword: "{searchQuery}" <span style={{ cursor: 'pointer', marginLeft: 4 }} onClick={() => setSearchQuery('')}>✕</span>
-                  </span>
-                )}
-              </div>
-
+            {activeFiltersCount > 0 && (
               <button
                 className="btn btn-ghost btn-sm"
                 onClick={clearAllFilters}
-                style={{ fontSize: '0.78rem', color: '#EF4444', borderColor: '#FECACA' }}
+                style={{ color: '#EF4444', borderColor: '#FECACA', fontSize: '0.8125rem' }}
               >
-                Clear All Filters
+                Clear All Filters ({activeFiltersCount})
               </button>
+            )}
+          </div>
+
+          {/* Row 2: 4-Axis Selectors */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 14,
+            marginBottom: 16
+          }}>
+            {/* 1. Exam Selector */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#4B5563', marginBottom: 6, textTransform: 'uppercase' }}>
+                1. Examination / Board
+              </label>
+              <select
+                value={selectedExam}
+                onChange={(e) => setSelectedExam(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '9px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--color-border)',
+                  backgroundColor: 'var(--color-bg)',
+                  fontSize: '0.875rem',
+                  color: 'var(--text-primary)',
+                  fontWeight: selectedExam ? 600 : 400
+                }}
+              >
+                {EXAM_OPTIONS.map(ex => (
+                  <option key={ex.id} value={ex.id}>{ex.label}</option>
+                ))}
+              </select>
             </div>
-          )}
+
+            {/* 2. Class / Standard Selector */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#4B5563', marginBottom: 6, textTransform: 'uppercase' }}>
+                2. Class / Standard Level
+              </label>
+              <select
+                value={selectedClass}
+                onChange={(e) => setSelectedClass(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '9px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--color-border)',
+                  backgroundColor: 'var(--color-bg)',
+                  fontSize: '0.875rem',
+                  color: 'var(--text-primary)',
+                  fontWeight: selectedClass ? 600 : 400
+                }}
+              >
+                {CLASS_OPTIONS.map(cl => (
+                  <option key={cl.id} value={cl.id}>{cl.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* 3. Subject Selector */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#4B5563', marginBottom: 6, textTransform: 'uppercase' }}>
+                3. Subject
+              </label>
+              <select
+                value={selectedSubject}
+                onChange={(e) => setSelectedSubject(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '9px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--color-border)',
+                  backgroundColor: 'var(--color-bg)',
+                  fontSize: '0.875rem',
+                  color: 'var(--text-primary)',
+                  fontWeight: selectedSubject ? 600 : 400
+                }}
+              >
+                <option value="">All Subjects ({allUniqueSubjects.length})</option>
+                {allUniqueSubjects.map(sub => (
+                  <option key={sub} value={sub}>{sub}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* 4. Education Sector Selector */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#4B5563', marginBottom: 6, textTransform: 'uppercase' }}>
+                4. Education Stream
+              </label>
+              <select
+                value={selectedEdu}
+                onChange={(e) => setSelectedEdu(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '9px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--color-border)',
+                  backgroundColor: 'var(--color-bg)',
+                  fontSize: '0.875rem',
+                  color: 'var(--text-primary)',
+                  fontWeight: selectedEdu ? 600 : 400
+                }}
+              >
+                {EDUCATION_OPTIONS.map(ed => (
+                  <option key={ed.id} value={ed.id}>{ed.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Quick Subject Pills for Core 10th Subjects */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', paddingTop: 8 }}>
+            <span style={{ fontSize: '0.75rem', color: '#6B7280', fontWeight: 600 }}>Quick Subjects:</span>
+            {['Mathematics', 'Science', 'Social Science', 'English', 'Tamil'].map(sub => {
+              const meta = SUBJECT_META[sub] || { icon: '📚' }
+              const isSelected = selectedSubject.toLowerCase() === sub.toLowerCase()
+              return (
+                <button
+                  key={sub}
+                  onClick={() => setSelectedSubject(isSelected ? '' : sub)}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '16px',
+                    border: isSelected ? '1px solid #2563EB' : '1px solid #E5E7EB',
+                    backgroundColor: isSelected ? '#EFF6FF' : '#F9FAFB',
+                    color: isSelected ? '#1D4ED8' : '#374151',
+                    fontSize: '0.78rem',
+                    fontWeight: isSelected ? 700 : 500,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span>{meta.icon}</span>
+                  <span>{sub}</span>
+                </button>
+              )
+            })}
+          </div>
+
         </div>
 
         {/* ── ACTIVE LESSON MODAL / WORKSPACE ────────────────────────────── */}
@@ -577,19 +474,19 @@ export default function LessonsPage() {
             padding: '24px',
             backgroundColor: '#ffffff',
             borderRadius: '16px',
-            border: '2px solid #8B5CF6',
-            boxShadow: '0 8px 30px rgba(139, 92, 246, 0.12)'
+            border: '2px solid #3B82F6',
+            boxShadow: '0 8px 30px rgba(59, 130, 246, 0.12)'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
               <div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6, flexWrap: 'wrap' }}>
                   <span style={{
                     fontSize: '0.72rem',
                     fontWeight: 700,
                     padding: '3px 8px',
                     borderRadius: '6px',
-                    backgroundColor: '#EDE9FE',
-                    color: '#6D28D9'
+                    backgroundColor: '#EFF6FF',
+                    color: '#1D4ED8'
                   }}>
                     {chapterDetail.standard_level} · {chapterDetail.subject_name}
                   </span>
@@ -601,7 +498,7 @@ export default function LessonsPage() {
                     backgroundColor: '#F3F4F6',
                     color: '#374151'
                   }}>
-                    Weightage: {chapterDetail.marks_weightage}
+                    Marks Weightage: {chapterDetail.marks_weightage}
                   </span>
                   <span style={{
                     fontSize: '0.72rem',
@@ -643,7 +540,7 @@ export default function LessonsPage() {
                 color: '#4B5563',
                 lineHeight: 1.5
               }}>
-                <strong style={{ color: '#111827' }}>💡 Chapter Blueprint & Core Concepts: </strong>
+                <strong style={{ color: '#111827' }}>💡 Core Concepts & Summary: </strong>
                 {chapterDetail.summary_notes}
               </div>
             )}
@@ -662,7 +559,7 @@ export default function LessonsPage() {
                 onClick={() => setActiveTab('textbook')}
                 style={{ fontWeight: 600 }}
               >
-                📖 Read Prescribed Textbook Chapter PDF
+                📖 Prescribed Textbook Chapter PDF
               </button>
               <button
                 className={`btn ${activeTab === 'ai' ? 'btn-primary' : 'btn-ghost'} btn-sm`}
@@ -721,7 +618,7 @@ export default function LessonsPage() {
                         <button
                           className="btn btn-ghost btn-sm"
                           onClick={() => toggleAnswer(q.id)}
-                          style={{ fontSize: '0.78rem', color: '#4F46E5', borderColor: '#C7D2FE', fontWeight: 600 }}
+                          style={{ fontSize: '0.78rem', color: '#2563EB', borderColor: '#BFDBFE', fontWeight: 600 }}
                         >
                           {revealedAnswers[q.id] ? '▲ Hide Solution' : '▼ View Step-by-Step Solution'}
                         </button>
@@ -749,7 +646,7 @@ export default function LessonsPage() {
                           lineHeight: 1.6,
                           color: '#166534'
                         }}>
-                          <strong>Official Solution / Marking Criteria:</strong>
+                          <strong>Official Solution / Marking Scheme:</strong>
                           <div style={{ marginTop: 6, whiteSpace: 'pre-wrap' }}>
                             {q.answer_explanation}
                           </div>
@@ -899,73 +796,91 @@ export default function LessonsPage() {
             gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
             gap: 20
           }}>
-            {filteredChapters.map((chap) => (
-              <div
-                key={chap.id}
-                style={{
-                  backgroundColor: '#ffffff',
-                  borderRadius: '14px',
-                  border: activeChapterId === chap.id ? '2px solid #8B5CF6' : '1px solid var(--color-border)',
-                  padding: '18px 22px',
-                  boxShadow: 'var(--shadow-sm)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  gap: 14,
-                  transition: 'transform 0.15s ease, box-shadow 0.15s ease'
-                }}
-              >
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <span style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      backgroundColor: '#EDE9FE',
-                      color: '#6D28D9'
-                    }}>
-                      {chap.standard_level} · {chap.subject_name}
-                    </span>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#059669', backgroundColor: '#ECFDF5', padding: '2px 8px', borderRadius: '4px' }}>
-                      {chap.marks_weightage}
-                    </span>
+            {filteredChapters.map((chap) => {
+              const meta = SUBJECT_META[chap.subject_name] || {
+                icon: '📚',
+                bg: '#F9FAFB',
+                border: '#E5E7EB',
+                text: '#374151',
+                accent: '#6B7280'
+              }
+
+              return (
+                <div
+                  key={chap.id}
+                  style={{
+                    backgroundColor: '#ffffff',
+                    borderRadius: '14px',
+                    border: activeChapterId === chap.id ? '2px solid #3B82F6' : '1px solid var(--color-border)',
+                    padding: '20px 22px',
+                    boxShadow: 'var(--shadow-sm)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    gap: 14,
+                    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        padding: '3px 9px',
+                        borderRadius: '6px',
+                        backgroundColor: meta.bg,
+                        color: meta.text,
+                        border: `1px solid ${meta.border}`,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4
+                      }}>
+                        <span>{meta.icon}</span>
+                        <span>{chap.subject_name}</span>
+                        <span style={{ opacity: 0.6 }}>•</span>
+                        <span>{chap.standard_level}</span>
+                      </span>
+
+                      <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#059669', backgroundColor: '#ECFDF5', padding: '2px 8px', borderRadius: '4px' }}>
+                        {chap.marks_weightage}
+                      </span>
+                    </div>
+
+                    <h3 style={{ fontSize: '1.1rem', margin: '0 0 8px 0', color: 'var(--text-primary)', lineHeight: 1.35, fontWeight: 700 }}>
+                      Ch {chap.chapter_number}: {chap.chapter_title}
+                    </h3>
+
+                    <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.45, maxHeight: '58px', overflow: 'hidden' }}>
+                      {chap.summary_notes}
+                    </p>
                   </div>
 
-                  <h3 style={{ fontSize: '1.05rem', margin: '0 0 8px 0', color: 'var(--text-primary)', lineHeight: 1.35 }}>
-                    Ch {chap.chapter_number}: {chap.chapter_title}
-                  </h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #F3F4F6', paddingTop: 12 }}>
+                    <span style={{ fontSize: '0.75rem', color: '#6B7280', fontWeight: 600 }}>
+                      ❓ {chap.question_count} Questions
+                    </span>
 
-                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.45, maxHeight: '60px', overflow: 'hidden' }}>
-                    {chap.summary_notes}
-                  </p>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #F3F4F6', paddingTop: 12 }}>
-                  <span style={{ fontSize: '0.75rem', color: '#6B7280', fontWeight: 600 }}>
-                    ❓ {chap.question_count} Curated Questions
-                  </span>
-
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <button
-                      className="btn btn-ghost btn-sm"
-                      style={{ fontSize: '0.75rem', padding: '5px 10px', height: 'auto', color: '#2563EB', borderColor: '#BFDBFE' }}
-                      onClick={() => handleOpenChapter(chap.id, 'textbook')}
-                      title="Read official textbook chapter"
-                    >
-                      📖 Book
-                    </button>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      style={{ fontSize: '0.75rem', padding: '5px 12px', height: 'auto', backgroundColor: '#8B5CF6', borderColor: '#8B5CF6' }}
-                      onClick={() => handleOpenChapter(chap.id, 'questions')}
-                    >
-                      Explore Lesson →
-                    </button>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        style={{ fontSize: '0.75rem', padding: '5px 10px', height: 'auto', color: '#2563EB', borderColor: '#BFDBFE' }}
+                        onClick={() => handleOpenChapter(chap.id, 'textbook')}
+                        title="Read official textbook chapter"
+                      >
+                        📖 Book
+                      </button>
+                      <button
+                        className="btn btn-primary btn-sm"
+                        style={{ fontSize: '0.75rem', padding: '5px 12px', height: 'auto' }}
+                        onClick={() => handleOpenChapter(chap.id, 'questions')}
+                      >
+                        Explore Lesson →
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
 

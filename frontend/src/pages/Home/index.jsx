@@ -292,14 +292,14 @@ export default function HomePage() {
         <div className="container">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 'var(--space-6)', textAlign: 'center' }}>
             {[
-              { val: '6',        label: 'Exams Covered'     },
-              { val: '160+',     label: 'Question Papers'   },
-              { val: '3,800+',   label: 'Total Pages'       },
-              { val: '100%',     label: 'Verified Archive'  },
+              { val: '4,540+',   label: 'Question Papers'   },
+              { val: '3,850+',   label: 'Verified Official Sets' },
+              { val: '10+ Years', label: 'Multi-Set 2015–2024' },
+              { val: '100%',     label: 'Free & Open Source' },
             ].map(({ val, label }) => (
               <div key={label}>
-                <div className="mono" style={{ fontSize: '1.75rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{val}</div>
-                <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
+                <div className="mono" style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{val}</div>
+                <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>{label}</div>
               </div>
             ))}
           </div>

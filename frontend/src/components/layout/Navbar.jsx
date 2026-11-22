@@ -4,14 +4,29 @@ import { useAuthStore, useToastStore } from '../../store'
 import { useOnlineStatus } from '../../hooks/useOnlineStatus'
 import { fetchNotifications, markNotificationRead } from '../../api/client'
 
-const EXAM_SLUGS = [
-  { slug: 'class-10',    label: 'Class 10' },
-  { slug: 'class-12',    label: 'Class 12' },
-  { slug: 'state-boards', label: 'State Boards' },
-  { slug: 'jee',         label: 'JEE' },
-  { slug: 'neet',        label: 'NEET' },
-  { slug: 'tnpsc',       label: 'TNPSC' },
-  { slug: 'upsc',        label: 'UPSC' },
+const EXAM_GROUPS = [
+  {
+    heading: '🏫 School Education (K-12)',
+    items: [
+      { slug: 'class-10', label: 'CBSE Class 10 (Secondary)', desc: 'Math, Science, Social, English, Tamil' },
+      { slug: 'class-12', label: 'CBSE Class 12 (Sr. Secondary)', desc: 'Maths, Physics, Chemistry, Biology, Commerce' },
+      { slug: 'state-boards', label: 'State Boards Archive', desc: 'Tamil Nadu SSLC/HSC, UP, Bihar, MH, RJ' },
+    ]
+  },
+  {
+    heading: '🎯 Competitive Entrances',
+    items: [
+      { slug: 'jee', label: 'JEE (Main & Advanced)', desc: 'Engineering Entrance Papers & Solutions' },
+      { slug: 'neet', label: 'NEET UG', desc: 'Medical Entrance Physics, Chemistry, Biology' },
+    ]
+  },
+  {
+    heading: '🏛️ Civil Services & Defence',
+    items: [
+      { slug: 'upsc', label: 'UPSC Civil Services', desc: 'Prelims, Mains, IFS, NDA, CDS, CAPF' },
+      { slug: 'tnpsc', label: 'TNPSC Group Exams', desc: 'Group 1, 2, 4 & VAO Question Papers' },
+    ]
+  }
 ]
 
 function NotificationBell() {
@@ -188,6 +203,8 @@ export default function Navbar() {
   const navigate = useNavigate()
   const isOnline = useOnlineStatus()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [examsDropdownOpen, setExamsDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
 
   const handleLogout = () => {
     logout()
@@ -196,14 +213,30 @@ export default function Navbar() {
     navigate('/login')
   }
 
-  const closeMenu = () => setMobileMenuOpen(false)
+  const closeMenu = () => {
+    setMobileMenuOpen(false)
+    setExamsDropdownOpen(false)
+  }
 
-  const handleNavLinkClick = (e) => {
+  // Close exams dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setExamsDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleProtectedClick = (e, path) => {
     closeMenu()
     if (!user) {
       e.preventDefault()
       addToast('Please sign in or register to access question papers.', 'info')
       navigate('/login')
+    } else if (path) {
+      navigate(path)
     }
   }
 
@@ -222,7 +255,7 @@ export default function Navbar() {
           )}
         </Link>
 
-        {/* Mobile menu button */}
+        {/* Mobile menu toggle */}
         <button
           className="navbar-mobile-toggle"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -232,20 +265,102 @@ export default function Navbar() {
           {mobileMenuOpen ? '✕' : '☰'}
         </button>
 
-        {/* Navigation links & actions */}
+        {/* Clean, Grouped Navigation Bar */}
         <div className={`navbar-content ${mobileMenuOpen ? 'is-open' : ''}`}>
           <ul className="navbar-links">
-            {EXAM_SLUGS.map(({ slug, label }) => (
-              <li key={slug}>
-                <NavLink
-                  to={`/exam/${slug}`}
-                  className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
-                  onClick={handleNavLinkClick}
-                >
-                  {label}
-                </NavLink>
-              </li>
-            ))}
+            
+            {/* 1. Categorized Exams Dropdown */}
+            <li ref={dropdownRef} style={{ position: 'relative' }}>
+              <button
+                className="navbar-link"
+                onClick={() => setExamsDropdownOpen(!examsDropdownOpen)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: examsDropdownOpen ? 'var(--color-primary)' : 'inherit'
+                }}
+              >
+                <span>📝 All Exams & Boards</span>
+                <span style={{ fontSize: '0.7rem', transition: 'transform 0.15s ease', transform: examsDropdownOpen ? 'rotate(180deg)' : 'none' }}>▼</span>
+              </button>
+
+              {examsDropdownOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 10px)',
+                  left: 0,
+                  width: '380px',
+                  maxWidth: '92vw',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '16px',
+                  boxShadow: '0 12px 36px rgba(0,0,0,0.12)',
+                  padding: '16px',
+                  zIndex: 1100,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 16
+                }}>
+                  {EXAM_GROUPS.map((group) => (
+                    <div key={group.heading}>
+                      <div style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        color: 'var(--text-muted)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        marginBottom: 6,
+                        paddingLeft: 6
+                      }}>
+                        {group.heading}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {group.items.map((item) => (
+                          <Link
+                            key={item.slug}
+                            to={`/exam/${item.slug}`}
+                            onClick={(e) => handleProtectedClick(e, `/exam/${item.slug}`)}
+                            style={{
+                              padding: '8px 10px',
+                              borderRadius: '8px',
+                              textDecoration: 'none',
+                              color: 'var(--text-primary)',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              transition: 'background-color 0.15s ease'
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F3F4F6')}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                          >
+                            <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{item.label}</span>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{item.desc}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </li>
+
+            {/* 2. Lessons & Chapters Hub */}
+            <li>
+              <NavLink
+                to="/lessons"
+                className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
+                onClick={closeMenu}
+              >
+                📑 Curriculum Lessons
+              </NavLink>
+            </li>
+
+            {/* 3. Textbooks */}
             <li>
               <NavLink
                 to="/textbooks"
@@ -255,15 +370,8 @@ export default function Navbar() {
                 📚 Textbooks
               </NavLink>
             </li>
-            <li>
-              <NavLink
-                to="/lessons"
-                className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
-                onClick={closeMenu}
-              >
-                📑 Lessons
-              </NavLink>
-            </li>
+
+            {/* 4. Open Repositories & Sources */}
             <li>
               <NavLink
                 to="/repositories"
@@ -273,70 +381,62 @@ export default function Navbar() {
                 🐙 Repositories
               </NavLink>
             </li>
-            <li>
-              <NavLink
-                to="/sources"
-                className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
-                onClick={closeMenu}
-              >
-                📜 Sources
-              </NavLink>
-            </li>
+
+            {/* 5. Search Hub */}
             <li>
               <NavLink
                 to="/search"
                 className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}
-                onClick={handleNavLinkClick}
+                onClick={(e) => handleProtectedClick(e, '/search')}
               >
                 🔍 Search
               </NavLink>
             </li>
+
           </ul>
 
+          {/* User actions */}
           <div className="navbar-actions">
             {user && user.role === 'user' && <NotificationBell />}
             {user ? (
               <>
                 <NavLink
                   to="/bookmarks"
-                  className="btn btn-ghost btn-sm"
+                  className={({ isActive }) => `btn btn-ghost btn-sm ${isActive ? 'active' : ''}`}
                   onClick={closeMenu}
+                  title="Your saved bookmarks"
                 >
-                  ★ Bookmarks
+                  ⭐ Bookmarks
                 </NavLink>
-                {(user.role === 'admin' || user.role === 'verifier') && (
+
+                {user.role === 'admin' && (
                   <NavLink
                     to="/admin"
                     className="btn btn-ghost btn-sm"
                     onClick={closeMenu}
+                    style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
                   >
-                    ⚙ Dashboard
+                    🛡️ Admin
                   </NavLink>
                 )}
+
                 <button
                   className="btn btn-ghost btn-sm"
                   onClick={handleLogout}
+                  style={{ color: '#EF4444' }}
                 >
                   Sign Out
                 </button>
               </>
             ) : (
-              <>
-                <NavLink
-                  to="/login"
-                  className="btn btn-ghost btn-sm"
-                  onClick={closeMenu}
-                >
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <Link to="/login" className="btn btn-ghost btn-sm" onClick={closeMenu}>
                   Sign In
-                </NavLink>
-                <NavLink
-                  to="/register"
-                  className="btn btn-primary btn-sm"
-                  onClick={closeMenu}
-                >
-                  Register
-                </NavLink>
-              </>
+                </Link>
+                <Link to="/register" className="btn btn-primary btn-sm" onClick={closeMenu}>
+                  Register Free
+                </Link>
+              </div>
             )}
           </div>
         </div>

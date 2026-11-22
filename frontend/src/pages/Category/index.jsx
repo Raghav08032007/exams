@@ -156,9 +156,12 @@ export default function CategoryPage() {
     fetchPapers(params)
       .then((res) => {
         if (isCancelled) return
-        setPapers(res.papers || [])
-        setTotalPapers(res.total || res.papers?.length || 0)
-        setTotalPages(res.total_pages || Math.ceil((res.total || 1) / 48) || 1)
+        const paperList = res.papers || []
+        const total = res.pagination?.total ?? res.total ?? paperList.length
+        const totalPages = res.pagination?.pages ?? res.total_pages ?? Math.ceil(total / (params.per_page || 48))
+        setPapers(paperList)
+        setTotalPapers(total)
+        setTotalPages(Math.max(1, totalPages))
       })
       .catch(() => {})
       .finally(() => {
@@ -208,10 +211,13 @@ export default function CategoryPage() {
   const filteredPapers = useMemo(() => {
     return papers.filter(p => {
       const matchesSearch = !searchQuery || p.title.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesSubj = !selectedSubject || (p.subjects || []).some(s => {
-        const name = typeof s === 'object' ? s.name : s
-        return name.toLowerCase().includes(selectedSubject.toLowerCase())
-      })
+      const matchesSubj = !selectedSubject || (p.subjects || []).length === 0 || (p.subjects || []).some(s => {
+        const name = (typeof s === 'object' ? s.name : s).toLowerCase()
+        const sel = selectedSubject.toLowerCase()
+        if (sel.includes('math') && name.includes('math')) return true
+        if (sel.includes('social') && name.includes('social')) return true
+        return name.includes(sel) || sel.includes(name)
+      }) || (p.title && p.title.toLowerCase().includes(selectedSubject.toLowerCase()))
       const matchesYear = !selectedYear || String(p.year) === String(selectedYear)
       const matchesType = selectedType === 'all'
         ? true
@@ -621,6 +627,50 @@ export default function CategoryPage() {
                 ))}
               </div>
             )}
+
+            {/* Quick Core Subject Pills Bar */}
+            <div style={{
+              display: 'flex',
+              gap: 8,
+              flexWrap: 'wrap',
+              marginBottom: 24,
+              alignItems: 'center',
+              padding: '8px 14px',
+              backgroundColor: 'rgba(99, 102, 241, 0.04)',
+              borderRadius: 10,
+              border: '1px solid rgba(99, 102, 241, 0.18)'
+            }}>
+              <span style={{ fontSize: '0.78125rem', fontWeight: 700, color: '#4338ca' }}>
+                🎯 Core Subject:
+              </span>
+              {['All Subjects', 'Mathematics', 'Science', 'Social Science', 'English', 'Tamil', 'Hindi'].map(sub => {
+                const isSelected = sub === 'All Subjects' ? !selectedSubject : selectedSubject.toLowerCase() === sub.toLowerCase()
+                return (
+                  <button
+                    key={sub}
+                    type="button"
+                    onClick={() => {
+                      setSelectedSubject(sub === 'All Subjects' ? '' : sub)
+                      setCurrentPage(1)
+                    }}
+                    style={{
+                      padding: '4px 12px',
+                      borderRadius: 14,
+                      border: '1px solid',
+                      borderColor: isSelected ? '#4f46e5' : 'var(--color-border)',
+                      backgroundColor: isSelected ? '#4f46e5' : '#ffffff',
+                      color: isSelected ? '#ffffff' : 'var(--text-primary)',
+                      fontSize: '0.78125rem',
+                      fontWeight: isSelected ? 700 : 500,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {sub}
+                  </button>
+                )
+              })}
+            </div>
 
             {/* Papers Grid */}
             {filteredPapers.length === 0 ? (

@@ -1675,14 +1675,49 @@ export default function PaperDetailPage() {
             currentViewUrl ? (
               viewerMode === 'embed' ? (
                 /* Native Browser PDF Engine */
-                <div style={{ width: '100%', height: isFullscreen ? 'calc(100vh - 60px)' : '850px', background: '#525659' }}>
-                  <iframe
-                    src={`${currentViewUrl}#toolbar=1&navpanes=1&scrollbar=1`}
-                    title={activeDoc === 'key' ? 'Official Answer Key' : activeDoc === 'textbook' ? (activeTextbook?.title || 'Curriculum Textbook') : paper.title}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 'none', display: 'block', backgroundColor: '#525659' }}
-                  />
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', background: '#525659', borderRadius: '0 0 12px 12px', overflow: 'hidden' }}>
+                  <div style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#1e293b',
+                    color: '#cbd5e1',
+                    fontSize: '0.78125rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: 8,
+                    borderBottom: '1px solid #334155'
+                  }}>
+                    <span>💡 Seeing a blank or gray box? Your browser might have embedded PDF previews disabled.</span>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        type="button"
+                        onClick={() => setViewerMode('canvas')}
+                        className="btn btn-secondary btn-sm"
+                        style={{ fontSize: '0.72rem', padding: '3px 10px', color: '#fff', borderColor: '#475569' }}
+                      >
+                        🔄 Switch to Canvas Renderer
+                      </button>
+                      <a
+                        href={currentViewUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-primary btn-sm"
+                        style={{ fontSize: '0.72rem', padding: '3px 10px' }}
+                      >
+                        ↗ Open in New Window
+                      </a>
+                    </div>
+                  </div>
+                  <div style={{ width: '100%', height: isFullscreen ? 'calc(100vh - 100px)' : '850px' }}>
+                    <iframe
+                      src={`${currentViewUrl}#toolbar=1&navpanes=1&scrollbar=1`}
+                      title={activeDoc === 'key' ? 'Official Answer Key' : activeDoc === 'textbook' ? (activeTextbook?.title || 'Curriculum Textbook') : paper.title}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 'none', display: 'block', backgroundColor: '#525659' }}
+                    />
+                  </div>
                 </div>
               ) : (
                 /* Canvas react-pdf mode */

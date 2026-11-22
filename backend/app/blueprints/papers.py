@@ -210,14 +210,34 @@ def list_papers():
     elif has_answer_key in ("0", "false", "no"):
         where_clauses.append("p.has_answer_key = 0")
     if subject:
-        where_clauses.append("""
-            EXISTS (
-                SELECT 1 FROM paper_subjects ps
-                JOIN subjects s ON ps.subject_id = s.id
-                WHERE ps.paper_id = p.id AND (s.name = %s OR s.name LIKE %s)
-            )
-        """)
-        params.extend([subject, f"%{subject}%"])
+        subj_lower = subject.lower()
+        if "math" in subj_lower:
+            where_clauses.append("""
+                EXISTS (
+                    SELECT 1 FROM paper_subjects ps
+                    JOIN subjects s ON ps.subject_id = s.id
+                    WHERE ps.paper_id = p.id AND (s.name LIKE %s)
+                )
+            """)
+            params.append("%Math%")
+        elif "social" in subj_lower or subj_lower == "sst":
+            where_clauses.append("""
+                EXISTS (
+                    SELECT 1 FROM paper_subjects ps
+                    JOIN subjects s ON ps.subject_id = s.id
+                    WHERE ps.paper_id = p.id AND (s.name LIKE %s)
+                )
+            """)
+            params.append("%Social%")
+        else:
+            where_clauses.append("""
+                EXISTS (
+                    SELECT 1 FROM paper_subjects ps
+                    JOIN subjects s ON ps.subject_id = s.id
+                    WHERE ps.paper_id = p.id AND (s.name = %s OR s.name LIKE %s)
+                )
+            """)
+            params.extend([subject, f"%{subject}%"])
     if year:
         where_clauses.append("p.year = %s")
         params.append(year)
@@ -249,13 +269,18 @@ def list_papers():
     papers = _attach_subjects(papers, conn)
     papers = _attach_textbooks(papers, conn)
 
+    pages_count = (total + per_page - 1) // per_page if total > 0 else 0
     return jsonify({
         "papers": papers,
+        "total": total,
+        "total_pages": pages_count,
+        "page": page,
+        "per_page": per_page,
         "pagination": {
             "page":     page,
             "per_page": per_page,
             "total":    total,
-            "pages":    (total + per_page - 1) // per_page if total > 0 else 0,
+            "pages":    pages_count,
         },
     }), 200
 

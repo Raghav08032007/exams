@@ -185,7 +185,7 @@ export default function PaperDetailPage() {
   const [aiLoading, setAiLoading] = useState(false)
   const [aiSolution, setAiSolution] = useState(null)
   const [aiModelUsed, setAiModelUsed] = useState('')
-  
+
   const { isCached, isDownloading, saveForOffline, removeFromOffline } = useOfflineStorage(paper)
 
   useEffect(() => {
@@ -195,10 +195,10 @@ export default function PaperDetailPage() {
         setNoteText(res.note || '')
         setLastSavedNoteTime(res.updated_at)
       })
-      .catch(() => {})
+      .catch(() => { })
     fetchPracticeHistory(id)
       .then(setPracticeHistory)
-      .catch(() => {})
+      .catch(() => { })
   }, [user, id])
 
   // Timer interval for Practice Mode
@@ -346,7 +346,7 @@ export default function PaperDetailPage() {
       .then((bms) => {
         setIsBookmarked(bms.some((b) => b.paper_id === paper.id))
       })
-      .catch(() => {})
+      .catch(() => { })
   }, [user, paper])
 
   const handleLoadPDF = useCallback(async () => {
@@ -395,10 +395,10 @@ export default function PaperDetailPage() {
   const toggleFullscreen = () => {
     if (!viewerContainerRef.current) return
     if (!document.fullscreenElement) {
-      viewerContainerRef.current.requestFullscreen().catch(() => {})
+      viewerContainerRef.current.requestFullscreen().catch(() => { })
       setIsFullscreen(true)
     } else {
-      document.exitFullscreen().catch(() => {})
+      document.exitFullscreen().catch(() => { })
       setIsFullscreen(false)
     }
   }
@@ -1785,274 +1785,274 @@ export default function PaperDetailPage() {
           )}
         </div>
 
-      {/* ── INTERACTIVE EXAM PRACTICE & SELF-SCORING SIMULATOR MODAL ── */}
-      {practiceModalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.85)',
-          backdropFilter: 'blur(8px)',
-          zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '16px',
-        }}>
-          {/* Top Control Bar */}
+        {/* ── INTERACTIVE EXAM PRACTICE & SELF-SCORING SIMULATOR MODAL ── */}
+        {practiceModalOpen && (
           <div style={{
-            backgroundColor: '#1e293b',
-            borderRadius: '12px 12px 0 0',
-            padding: '14px 24px',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.85)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 9999,
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            color: '#f8fafc',
-            flexWrap: 'wrap',
-            gap: 12,
-            borderBottom: '1px solid #334155'
+            flexDirection: 'column',
+            padding: '16px',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: '1.25rem' }}>⏱️</span>
-              <div>
-                <span style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#f8fafc' }}>
-                  Exam Practice Simulator — {paper.title}
-                </span>
-                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                  Authentic Timed Examination Environment & Self-Evaluation
+            {/* Top Control Bar */}
+            <div style={{
+              backgroundColor: '#1e293b',
+              borderRadius: '12px 12px 0 0',
+              padding: '14px 24px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              color: '#f8fafc',
+              flexWrap: 'wrap',
+              gap: 12,
+              borderBottom: '1px solid #334155'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: '1.25rem' }}>⏱️</span>
+                <div>
+                  <span style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#f8fafc' }}>
+                    Exam Practice Simulator — {paper.title}
+                  </span>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                    Authentic Timed Examination Environment & Self-Evaluation
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Timer Display & Controls */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                fontFamily: 'monospace',
-                backgroundColor: timerSeconds < 300 ? '#7f1d1d' : '#0f172a',
-                color: timerSeconds < 300 ? '#fca5a5' : '#38bdf8',
-                padding: '6px 14px',
-                borderRadius: '8px',
-                border: '1px solid #334155'
-              }}>
-                {formatTimer(timerSeconds)}
-              </div>
-
-              {!practiceFinished ? (
-                <>
-                  <button
-                    className="btn btn-ghost btn-sm"
-                    style={{ color: '#f8fafc', border: '1px solid #475569' }}
-                    onClick={() => setTimerRunning(!timerRunning)}
-                  >
-                    {timerRunning ? '⏸ Pause' : '▶ Resume'}
-                  </button>
-                  <button
-                    className="btn btn-primary btn-sm"
-                    style={{ backgroundColor: '#10B981', borderColor: '#10B981', fontWeight: 600 }}
-                    onClick={handleFinishPractice}
-                  >
-                    🏁 Finish & Reveal Key
-                  </button>
-                </>
-              ) : (
-                <span style={{ fontSize: '0.8125rem', color: '#34d399', fontWeight: 600 }}>
-                  ✓ Exam Submitted — Evaluate Below
-                </span>
-              )}
-
-              <button
-                className="btn btn-ghost btn-sm"
-                style={{ color: '#94a3b8' }}
-                onClick={() => setPracticeModalOpen(false)}
-              >
-                ✕ Close
-              </button>
-            </div>
-          </div>
-
-          {/* Dual Split Testing Workspace */}
-          <div style={{
-            flex: 1,
-            display: 'grid',
-            gridTemplateColumns: '1.2fr 1fr',
-            gap: '2px',
-            backgroundColor: '#334155',
-            overflow: 'hidden',
-            borderRadius: '0 0 12px 12px'
-          }}>
-            {/* Left Pane: Question Paper */}
-            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#525659' }}>
-              <div style={{
-                padding: '8px 16px',
-                backgroundColor: '#0f172a',
-                color: '#94a3b8',
-                fontSize: '0.78125rem',
-                fontWeight: 600
-              }}>
-                📑 Genuine Question Paper (Solve on paper or rough scratchpad)
-              </div>
-              <iframe
-                src={`${pdfUrl}#toolbar=0&navpanes=0`}
-                title="Exam Simulator Question Paper"
-                width="100%"
-                height="100%"
-                style={{ border: 'none', flex: 1, display: 'block', backgroundColor: '#525659' }}
-              />
-            </div>
-
-            {/* Right Pane: Scratchpad (during exam) OR Answer Key & Score Recording (post-exam) */}
-            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff', overflowY: 'auto' }}>
-              {!practiceFinished ? (
-                /* IN-PROGRESS EXAM SCRATCHPAD */
-                <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '100%' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <span style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#1e293b' }}>
-                      ✍️ Rough Answer Sheet & Checklist
-                    </span>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                      Track your question numbers & rough calculations
-                    </span>
-                  </div>
-                  <textarea
-                    value={scratchText}
-                    onChange={(e) => setScratchText(e.target.value)}
-                    placeholder="Q1: (A)&#10;Q2: 42.5 J&#10;Q3: Photosynthesis light reaction formula...&#10;Q4: Skipped (review later)"
-                    style={{
-                      flex: 1,
-                      width: '100%',
-                      padding: '14px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      fontFamily: 'monospace',
-                      fontSize: '0.875rem',
-                      lineHeight: 1.6,
-                      resize: 'none',
-                      marginBottom: 16,
-                      backgroundColor: '#f8fafc'
-                    }}
-                  />
-                  <div style={{
-                    padding: '14px 18px',
-                    backgroundColor: '#eff6ff',
-                    borderRadius: '8px',
-                    border: '1px solid #bfdbfe',
-                    marginBottom: 16
-                  }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.8125rem', color: '#1e40af', marginBottom: 4 }}>
-                      💡 Real Exam Strategy
-                    </div>
-                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#1e3a8a', lineHeight: 1.45 }}>
-                      Attempt every section with realistic discipline. When ready to evaluate, click <strong>"Finish & Reveal Key"</strong> at the top right to verify your responses against the board marking scheme.
-                    </p>
-                  </div>
-                  <button
-                    className="btn btn-primary"
-                    style={{ backgroundColor: '#10B981', borderColor: '#10B981', width: '100%', fontWeight: 700 }}
-                    onClick={handleFinishPractice}
-                  >
-                    🏁 Finish Exam & Review Scoring Scheme →
-                  </button>
+              {/* Timer Display & Controls */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{
+                  fontSize: '1.25rem',
+                  fontWeight: 700,
+                  fontFamily: 'monospace',
+                  backgroundColor: timerSeconds < 300 ? '#7f1d1d' : '#0f172a',
+                  color: timerSeconds < 300 ? '#fca5a5' : '#38bdf8',
+                  padding: '6px 14px',
+                  borderRadius: '8px',
+                  border: '1px solid #334155'
+                }}>
+                  {formatTimer(timerSeconds)}
                 </div>
-              ) : (
-                /* POST-EXAM EVALUATION & SCORING */
-                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                  <div style={{
-                    padding: '16px 20px',
-                    backgroundColor: '#064e3b',
-                    color: '#ecfdf5',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.9375rem' }}>
-                        🔑 Official Scoring Scheme & Self-Evaluation
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: '#a7f3d0' }}>
-                        Time taken: {Math.floor((timerDuration - timerSeconds) / 60)} minutes
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* Top Score Input Form */}
-                  <div style={{
-                    padding: '16px 20px',
-                    backgroundColor: '#f0fdf4',
-                    borderBottom: '1px solid #bbf7d0',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 10
-                  }}>
-                    <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#166534' }}>Your Score:</span>
-                        <input
-                          type="number"
-                          value={selfScore}
-                          onChange={(e) => setSelfScore(e.target.value)}
-                          placeholder="e.g. 84"
-                          style={{
-                            width: '90px',
-                            padding: '6px 10px',
-                            borderRadius: '6px',
-                            border: '1px solid #86efac',
-                            fontWeight: 700,
-                            fontSize: '0.875rem'
-                          }}
-                        />
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#166534' }}>Out of:</span>
-                        <input
-                          type="number"
-                          value={maxScore}
-                          onChange={(e) => setMaxScore(e.target.value)}
-                          placeholder="100"
-                          style={{
-                            width: '80px',
-                            padding: '6px 10px',
-                            borderRadius: '6px',
-                            border: '1px solid #86efac',
-                            fontWeight: 700,
-                            fontSize: '0.875rem'
-                          }}
-                        />
-                      </div>
-                      <button
-                        className="btn btn-primary btn-sm"
-                        style={{ backgroundColor: '#16a34a', borderColor: '#16a34a', fontWeight: 600 }}
-                        onClick={handleRecordAttempt}
-                        disabled={recordingAttempt}
-                      >
-                        {recordingAttempt ? 'Saving...' : '💾 Record Score in Profile'}
-                      </button>
-                    </div>
-                  </div>
+                {!practiceFinished ? (
+                  <>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      style={{ color: '#f8fafc', border: '1px solid #475569' }}
+                      onClick={() => setTimerRunning(!timerRunning)}
+                    >
+                      {timerRunning ? '⏸ Pause' : '▶ Resume'}
+                    </button>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      style={{ backgroundColor: '#10B981', borderColor: '#10B981', fontWeight: 600 }}
+                      onClick={handleFinishPractice}
+                    >
+                      🏁 Finish & Reveal Key
+                    </button>
+                  </>
+                ) : (
+                  <span style={{ fontSize: '0.8125rem', color: '#34d399', fontWeight: 600 }}>
+                    ✓ Exam Submitted — Evaluate Below
+                  </span>
+                )}
 
-                  {/* Answer Key Document Viewer */}
-                  {hasKey ? (
-                    <iframe
-                      src={`${paper.answer_key_pdf_url}#toolbar=1&navpanes=0`}
-                      title="Practice Official Answer Key"
-                      width="100%"
-                      height="100%"
-                      style={{ border: 'none', flex: 1, display: 'block', backgroundColor: '#525659' }}
+                <button
+                  className="btn btn-ghost btn-sm"
+                  style={{ color: '#94a3b8' }}
+                  onClick={() => setPracticeModalOpen(false)}
+                >
+                  ✕ Close
+                </button>
+              </div>
+            </div>
+
+            {/* Dual Split Testing Workspace */}
+            <div style={{
+              flex: 1,
+              display: 'grid',
+              gridTemplateColumns: '1.2fr 1fr',
+              gap: '2px',
+              backgroundColor: '#334155',
+              overflow: 'hidden',
+              borderRadius: '0 0 12px 12px'
+            }}>
+              {/* Left Pane: Question Paper */}
+              <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#525659' }}>
+                <div style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#0f172a',
+                  color: '#94a3b8',
+                  fontSize: '0.78125rem',
+                  fontWeight: 600
+                }}>
+                  📑 Genuine Question Paper (Solve on paper or rough scratchpad)
+                </div>
+                <iframe
+                  src={`${pdfUrl}#toolbar=0&navpanes=0`}
+                  title="Exam Simulator Question Paper"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 'none', flex: 1, display: 'block', backgroundColor: '#525659' }}
+                />
+              </div>
+
+              {/* Right Pane: Scratchpad (during exam) OR Answer Key & Score Recording (post-exam) */}
+              <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#ffffff', overflowY: 'auto' }}>
+                {!practiceFinished ? (
+                  /* IN-PROGRESS EXAM SCRATCHPAD */
+                  <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.9375rem', color: '#1e293b' }}>
+                        ✍️ Rough Answer Sheet & Checklist
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        Track your question numbers & rough calculations
+                      </span>
+                    </div>
+                    <textarea
+                      value={scratchText}
+                      onChange={(e) => setScratchText(e.target.value)}
+                      placeholder="Q1: (A)&#10;Q2: 42.5 J&#10;Q3: Photosynthesis light reaction formula...&#10;Q4: Skipped (review later)"
+                      style={{
+                        flex: 1,
+                        width: '100%',
+                        padding: '14px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontFamily: 'monospace',
+                        fontSize: '0.875rem',
+                        lineHeight: 1.6,
+                        resize: 'none',
+                        marginBottom: 16,
+                        backgroundColor: '#f8fafc'
+                      }}
                     />
-                  ) : (
-                    <div style={{ padding: '30px', textAlign: 'center', color: '#64748b' }}>
-                      <div style={{ fontSize: '2rem', marginBottom: 8 }}>📑</div>
-                      <p>Official Answer Key is descriptive or institutional. Use your rough notes to record your score.</p>
+                    <div style={{
+                      padding: '14px 18px',
+                      backgroundColor: '#eff6ff',
+                      borderRadius: '8px',
+                      border: '1px solid #bfdbfe',
+                      marginBottom: 16
+                    }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.8125rem', color: '#1e40af', marginBottom: 4 }}>
+                        💡 Real Exam Strategy
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.75rem', color: '#1e3a8a', lineHeight: 1.45 }}>
+                        Attempt every section with realistic discipline. When ready to evaluate, click <strong>"Finish & Reveal Key"</strong> at the top right to verify your responses against the board marking scheme.
+                      </p>
                     </div>
-                  )}
-                </div>
-              )}
+                    <button
+                      className="btn btn-primary"
+                      style={{ backgroundColor: '#10B981', borderColor: '#10B981', width: '100%', fontWeight: 700 }}
+                      onClick={handleFinishPractice}
+                    >
+                      🏁 Finish Exam & Review Scoring Scheme →
+                    </button>
+                  </div>
+                ) : (
+                  /* POST-EXAM EVALUATION & SCORING */
+                  <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <div style={{
+                      padding: '16px 20px',
+                      backgroundColor: '#064e3b',
+                      color: '#ecfdf5',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '0.9375rem' }}>
+                          🔑 Official Scoring Scheme & Self-Evaluation
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#a7f3d0' }}>
+                          Time taken: {Math.floor((timerDuration - timerSeconds) / 60)} minutes
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Top Score Input Form */}
+                    <div style={{
+                      padding: '16px 20px',
+                      backgroundColor: '#f0fdf4',
+                      borderBottom: '1px solid #bbf7d0',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 10
+                    }}>
+                      <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#166534' }}>Your Score:</span>
+                          <input
+                            type="number"
+                            value={selfScore}
+                            onChange={(e) => setSelfScore(e.target.value)}
+                            placeholder="e.g. 84"
+                            style={{
+                              width: '90px',
+                              padding: '6px 10px',
+                              borderRadius: '6px',
+                              border: '1px solid #86efac',
+                              fontWeight: 700,
+                              fontSize: '0.875rem'
+                            }}
+                          />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#166534' }}>Out of:</span>
+                          <input
+                            type="number"
+                            value={maxScore}
+                            onChange={(e) => setMaxScore(e.target.value)}
+                            placeholder="100"
+                            style={{
+                              width: '80px',
+                              padding: '6px 10px',
+                              borderRadius: '6px',
+                              border: '1px solid #86efac',
+                              fontWeight: 700,
+                              fontSize: '0.875rem'
+                            }}
+                          />
+                        </div>
+                        <button
+                          className="btn btn-primary btn-sm"
+                          style={{ backgroundColor: '#16a34a', borderColor: '#16a34a', fontWeight: 600 }}
+                          onClick={handleRecordAttempt}
+                          disabled={recordingAttempt}
+                        >
+                          {recordingAttempt ? 'Saving...' : '💾 Record Score in Profile'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Answer Key Document Viewer */}
+                    {hasKey ? (
+                      <iframe
+                        src={`${paper.answer_key_pdf_url}#toolbar=1&navpanes=0`}
+                        title="Practice Official Answer Key"
+                        width="100%"
+                        height="100%"
+                        style={{ border: 'none', flex: 1, display: 'block', backgroundColor: '#525659' }}
+                      />
+                    ) : (
+                      <div style={{ padding: '30px', textAlign: 'center', color: '#64748b' }}>
+                        <div style={{ fontSize: '2rem', marginBottom: 8 }}>📑</div>
+                        <p>Official Answer Key is descriptive or institutional. Use your rough notes to record your score.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
       </div>
     </div>
